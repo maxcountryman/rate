@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Index{% endblock %}
+
+{% block content %}
+<h1>Bitcoin Exchange Rate Calculator</h1>
+<form>
+    <fieldset>
+        <legend>Calculate the exchange rate</legend>
+        <select id="type" name="currencies">
+            <option value="asks">USD</option>
+            <option value="bids">BTC</option>
+        </select>
+        Amount: <input type="text" name="amount" id="amount">
+        <button id="calculate-rate">Calculate</button>
+    </fieldset>
+</form>
+<p id="result">Result: <span id="result-amount">0</span> at <span id="result-rate">0</span> <span id="result-type">USD</span></p>
+
+<script type="text/javascript">
+var render_result = (function() {
+    return function(data, type) {
+        console.log(data);
+        $("#result-amount").text(data.amount + (type === "asks" ? " BTC" : " USD"));
+        $("#result-rate").text(data.rate);
+        $("#result-type").text("USD per BTC");
+    }
+})();
+
+$("#calculate-rate").click(function() {
+    var url = "{{ url_for('api.rate') }}";
+    var rate_type = $("#type").val();
+    var rate_amount = $("#amount").val();
+    $.ajax({type: "POST",
+            url: url,
+            data: "amount=" + rate_amount + "&type=" + rate_type,
+            success: function(data) { render_result(data, rate_type) } });
+    return false;
+});
+</script>
+{% endblock %}
